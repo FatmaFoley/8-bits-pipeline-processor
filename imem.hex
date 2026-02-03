@@ -1,0 +1,36 @@
+01
+02
+C0  // 0x00: LDM R0, #0x50 - Load direct address
+50  // 0x01: immediate
+03  // 0x02: NOP
+C1  // 0x03: LDM R1, #0xAB - Load data value
+AB  // 0x04: immediate
+04  // 0x05: NOP
+C9  // 0x06: STD R1, 0x50 - Store R1 to memory[0x50]
+50  // 0x07: ea = 0x50
+05  // 0x08: NOP
+C6  // 0x09: LDD R2, 0x50 - Load from memory[0x50] (should be 0xAB)
+50  // 0x0A: ea = 0x50
+28  // 0x0B: ADD R0, R2 - RAW hazard: R0+R2, needs forwarding from LDD
+C0  // 0x0C: LDM R0, #0x60 - Reload R0 with pointer
+60  // 0x0D: immediate
+06  // 0x0E: NOP
+01
+02
+E1  // 0x0F: STI R0, R1 - Indirect store: M[R0] = M[0x60] = R1
+D2  // 0x10: LDI R0, R2 - Indirect load: R2 = M[R0] = M[0x60]
+2E  // 0x11: ADD R2, R3 - RAW hazard: use R2 immediately after LDI
+C2  // 0x12: LDM R2, #0x52 - Load another address
+52  // 0x13: immediate
+07  // 0x14: NOP
+E6  // 0x15: STI R2, R2 - Edge case: store R2 using R2 as address!
+D6  // 0x16: LDI R2, R2 - Edge case: load R2 using R2 as address!
+8A  // 0x17: INC R2 - Use R2 immediately (load-use hazard)
+C5  // 0x18: LDD R1, 0x52 - Load from address we just wrote
+52  // 0x19: ea = 0x52
+08  // 0x1A: NOP
+05  // 0x1B: MOV R0, R1 - Move loaded value
+C0  // 0x1C: LDM R0, #0x1C - Halt preparation
+1C  // 0x1D: immediate
+B0  // 0x1E: JMP R0 - Infinite halt loop
+09  // 0x1F-0xFF: Padding
